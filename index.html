@@ -323,7 +323,7 @@ input:focus,select:focus{ border-color:var(--green); }
 .line-box{
   margin-top:1rem; text-align:center;
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-  padding:1.5rem 1.25rem;
+  padding:1.6rem 1.25rem;
 }
 .line-box h3{ font-size:1.25rem; margin:0 0 .3rem; }
 .line-box p{ margin:0 auto 1.1rem; color:var(--ink-soft); max-width:26rem; font-size:.95rem; }
@@ -337,10 +337,12 @@ input:focus,select:focus{ border-color:var(--green); }
   padding:.85rem; background:#fff; border:2px solid var(--line); border-radius:14px;
 }
 .qr-link:hover .qr{ border-color:#06C755; }
-.qr-cap{ margin:.85rem 0 0 !important; font-size:.88rem; }
+.qr-cap{ margin:.9rem auto 0 !important; font-size:.88rem; max-width:22rem; line-height:1.6; }
 .line-btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  margin-top:1rem; min-height:56px; padding:.8rem 1.6rem;
+  /* ใช้ flex ระดับบล็อก เพื่อไม่ให้เกิดช่องว่างส่วนเกินใต้ปุ่มจากระยะบรรทัด */
+  display:flex; align-items:center; justify-content:center;
+  width:fit-content; margin:1.25rem auto 0;
+  min-height:56px; padding:.8rem 1.6rem;
   background:#06C755; color:#fff; font-weight:700; text-decoration:none;
   border-radius:12px; box-shadow:0 3px 0 #049A43;
 }
@@ -931,12 +933,16 @@ input:focus,select:focus{ border-color:var(--green); }
         return;
       }
       if (out.ok !== true) throw new Error(out.message || "บันทึกไม่สำเร็จ");
+      console.log("[บันทึกสำเร็จ] ไฟล์:", out.file, "| แท็บ:", out.tab, "| แถวที่:", out.row);
       finish(data);
     } catch (err) {
       const a = $("formAlert");
-      a.textContent = (err && err.message === "CONNECT")
-        ? "ยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้าน (รหัสปัญหา: การตั้งค่าสิทธิ์ Apps Script)"
-        : "บันทึกข้อมูลไม่สำเร็จ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตแล้วกดบันทึกอีกครั้ง";
+      const msg = err && err.message ? err.message : "";
+      a.textContent = (msg === "CONNECT")
+        ? "ยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้าน"
+        : ("บันทึกข้อมูลไม่สำเร็จ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาลองใหม่อีกครั้ง" +
+           (msg && msg !== "CONNECT" ? " (" + msg + ")" : ""));
+      console.error("[บันทึกไม่สำเร็จ]", err);
       a.classList.add("show");
       a.scrollIntoView({ behavior:"smooth", block:"center" });
     } finally {
