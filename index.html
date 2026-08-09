@@ -944,7 +944,7 @@ input:focus,select:focus{ border-color:var(--green); }
   function statementHTML(d){
     const f = (v) => '<span class="fill">' + esc(v) + '</span>';
     return [
-      "ข้าพเจ้า " + f(d.firstName) + " นามสกุล " + f(d.lastName) +
+      "ข้าพเจ้า " + f(d.fullName) +
       " ขอยืนยันกับตัวแทนลูกบ้านว่า LINE ID ที่ใช้เข้าร่วมในกลุ่มนี้ เป็น LINE ID ของข้าพเจ้าอย่างแท้จริง " +
       "โดยข้าพเจ้าเป็น" + f(d.status) + "ของบ้านเลขที่ " + f(d.houseNo),
 
