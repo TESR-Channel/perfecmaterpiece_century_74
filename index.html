@@ -367,11 +367,78 @@ input:focus,select:focus{ border-color:var(--green); }
   .card{ padding:2rem 2rem; }
   .brand-name{ font-size:1.35rem; }
 }
+
+/* ── ข้อความยืนยัน (หน้า 2) ─────────────── */
+.decl{
+  border:1px solid var(--line);
+  border-left:6px solid var(--gold-line);
+  background:#FFFDF7;
+  border-radius:12px;
+  padding:1.25rem 1.15rem;
+  font-size:1rem;
+  line-height:1.95;
+}
+.decl p{ margin:0 0 .9rem; text-indent:1.5rem; }
+.decl p:last-child{ margin-bottom:0; }
+.fill{
+  display:inline-block; padding:0 .3rem;
+  background:var(--green-soft); border-bottom:2px solid var(--green);
+  font-weight:700; color:var(--green-dark);
+}
+.decl-info{
+  margin:1rem 0 0; padding:.9rem 1rem;
+  background:#F4F9FD; border:1px solid var(--line); border-radius:10px;
+  font-size:.92rem; line-height:1.8;
+}
+.decl-info div{ display:flex; justify-content:space-between; gap:1rem; }
+.decl-info span:first-child{ color:var(--ink-soft); }
+.decl-info span:last-child{ font-weight:600; text-align:right; word-break:break-word; }
+
+/* ── ปุ่มหลักฐาน (หน้า 3) ───────────────── */
+.evidence{
+  margin-top:1.4rem; padding-top:1.2rem; border-top:1px solid var(--line);
+}
+.evidence h3{ font-size:1.05rem; margin:0 0 .3rem; }
+.evidence > p{ margin:0 0 .9rem; font-size:.9rem; color:var(--ink-soft); }
+.ev-row{ display:grid; gap:.7rem; }
+@media (min-width:520px){ .ev-row{ grid-template-columns:1fr 1fr; } }
+.ev-btn{
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  min-height:58px; padding:.7rem 1rem; margin:0;
+  font-family:inherit; font-size:1rem; font-weight:700; text-decoration:none;
+  color:var(--green-dark); background:#fff;
+  border:2px solid var(--line); border-radius:14px; cursor:pointer;
+}
+.ev-btn:hover{ background:var(--green-soft); border-color:var(--green); }
+.ev-btn svg{ width:1.35rem; height:1.35rem; stroke:currentColor; fill:none; stroke-width:2.1; }
+.ev-link{
+  display:block; margin-top:.8rem; font-size:.85rem; color:var(--ink-soft);
+  text-align:center; word-break:break-all;
+}
+.ev-link a{ color:var(--green-dark); font-weight:600; }
+
+/* ── พื้นที่สำหรับสั่งพิมพ์ ─────────────── */
+#printArea{ display:none; }
+@media print{
+  @page{ size:A4; margin:18mm 16mm; }
+  html,body{ background:#fff !important; font-size:15px; }
+  #app{ display:none !important; }
+  #printArea{ display:block !important; color:#000; }
+  #printArea h1{ font-size:1.35rem; margin:0 0 .2rem; text-align:center; }
+  #printArea .pr-sub{ text-align:center; margin:0 0 1.4rem; font-size:.95rem; color:#333; }
+  #printArea .pr-body p{ margin:0 0 .8rem; text-indent:1.5rem; line-height:1.9; }
+  #printArea .pr-info{
+    margin:1.2rem 0; border:1px solid #999; border-radius:6px; padding:.7rem .9rem;
+  }
+  #printArea .pr-info div{ display:flex; justify-content:space-between; padding:.15rem 0; }
+  #printArea .pr-foot{ margin-top:1.6rem; font-size:.9rem; text-align:center; color:#333; }
+  #printArea .pr-sign{ margin-top:2.4rem; text-align:right; line-height:2.4; }
+}
 </style>
 </head>
 
 <body>
-<div class="wrap">
+<div class="wrap" id="app">
 
   <header class="top">
     <div>
@@ -385,75 +452,17 @@ input:focus,select:focus{ border-color:var(--green); }
   </header>
 
   <div class="steps" id="steps">
-    <p class="steps-label" id="stepsLabel">ขั้นตอนที่ 1 จาก 2 · อ่านและให้ความยินยอม</p>
+    <p class="steps-label" id="stepsLabel">ขั้นตอนที่ 1 จาก 2 · กรอกข้อมูลของท่าน</p>
     <div class="bars" aria-hidden="true">
       <span class="bar on" id="bar1"></span>
       <span class="bar" id="bar2"></span>
     </div>
   </div>
 
-  <!-- ═══ ขั้นตอนที่ 1 : PDPA ═══ -->
   <main>
+
+  <!-- ═══ ขั้นตอนที่ 1 : กรอกข้อมูล ═══ -->
   <section class="card screen" id="screen1">
-    <h2>ขอความยินยอมในการเก็บข้อมูล</h2>
-    <p class="lead">กรุณาอ่านข้อความด้านล่างนี้ก่อน แล้วกดเครื่องหมายถูกเพื่อไปหน้าถัดไปค่ะ</p>
-
-    <a class="pdf-link hidden" id="pdfLink" href="#" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-      เปิดอ่านเอกสารฉบับเต็ม (PDF)
-    </a>
-
-    <div class="doc" id="pdpaDoc" tabindex="0" role="region" aria-label="ข้อความนโยบายคุ้มครองข้อมูลส่วนบุคคล">
-      <h3>ประกาศความเป็นส่วนตัว (Privacy Notice)</h3>
-      <p><b>ตัวแทนลูกบ้านหมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่</b> ("ตัวแทนลูกบ้านฯ") ขอแจ้งให้ท่านทราบถึงการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่าน ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
-
-      <h3>1. ข้อมูลที่เก็บรวบรวม</h3>
-      <ul>
-        <li>ชื่อ และนามสกุล</li>
-        <li>เลขที่บ้านในโครงการ</li>
-        <li>หมายเลขโทรศัพท์</li>
-        <li>อีเมล (ถ้ามี)</li>
-        <li>สถานะการพักอาศัย (เจ้าของบ้าน หรือผู้อยู่อาศัย)</li>
-      </ul>
-
-      <h3>2. วัตถุประสงค์ในการใช้ข้อมูล</h3>
-      <ul>
-        <li>ยืนยันตัวตนของลูกบ้าน เพื่อเข้ากลุ่มสื่อสารของหมู่บ้าน</li>
-        <li>ติดต่อ แจ้งข่าวสาร ประกาศ และเรื่องเร่งด่วนภายในโครงการ</li>
-        <li>จัดทำทะเบียนลูกบ้าน เพื่อการบริหารจัดการส่วนกลาง</li>
-      </ul>
-
-      <h3>3. การเปิดเผยข้อมูล</h3>
-      <p>ตัวแทนลูกบ้านฯ จะไม่เปิดเผยข้อมูลของท่านต่อบุคคลภายนอกเพื่อการค้าหรือการโฆษณา และจะเปิดเผยเฉพาะแก่กรรมการและเจ้าหน้าที่ผู้มีหน้าที่เกี่ยวข้อง หรือเมื่อมีกฎหมายกำหนดให้ต้องเปิดเผยเท่านั้น</p>
-
-      <h3>4. ระยะเวลาการเก็บรักษา</h3>
-      <p>เก็บรักษาไว้ตลอดระยะเวลาที่ท่านยังพักอาศัยหรือเป็นเจ้าของกรรมสิทธิ์ในโครงการ และจะลบหรือทำลายเมื่อหมดความจำเป็นตามวัตถุประสงค์ข้างต้น</p>
-
-      <h3>5. สิทธิของเจ้าของข้อมูล</h3>
-      <p>ท่านมีสิทธิขอเข้าถึง ขอสำเนา ขอแก้ไขให้ถูกต้อง ขอลบ ขอคัดค้าน หรือขอถอนความยินยอมได้ตลอดเวลา โดยแจ้งความประสงค์ที่ตัวแทนลูกบ้านฯ ทั้งนี้การถอนความยินยอมจะไม่กระทบต่อการเก็บรวบรวมหรือใช้ข้อมูลที่ได้ดำเนินการไปแล้วโดยชอบ</p>
-
-      <h3>6. ช่องทางติดต่อ</h3>
-      <p>ตัวแทนลูกบ้านหมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่ <span id="docPhone"></span></p>
-
-      <div class="doc-note" id="draftNote">
-        ⓘ ข้อความนี้เป็นตัวอย่างชั่วคราว จะแทนที่ด้วยเอกสาร PDPA ฉบับจริงของหมู่บ้านต่อไป
-      </div>
-    </div>
-
-    <label class="agree" id="agreeBox" for="consent">
-      <input type="checkbox" id="consent">
-      <span>ข้าพเจ้าได้อ่านและเข้าใจข้อความข้างต้นแล้ว และ<b>ยินยอม</b>ให้ตัวแทนลูกบ้านฯ เก็บรวบรวมและใช้ข้อมูลของข้าพเจ้าตามวัตถุประสงค์ที่ระบุไว้</span>
-    </label>
-
-    <button class="btn" id="toStep2" type="button" disabled>
-      ยินยอม และกรอกข้อมูล
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
-    <p class="locked-note" id="lockedNote">กดเครื่องหมายถูกในกรอบด้านบนก่อน จึงจะไปต่อได้</p>
-  </section>
-
-  <!-- ═══ ขั้นตอนที่ 2 : ฟอร์ม ═══ -->
-  <section class="card screen hidden" id="screen2">
     <h2>กรอกข้อมูลของท่าน</h2>
     <p class="lead">ช่องที่มีเครื่องหมาย <span class="req">*</span> จำเป็นต้องกรอกค่ะ</p>
 
@@ -530,20 +539,40 @@ input:focus,select:focus{ border-color:var(--green); }
       <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
              style="position:absolute;left:-9999px;opacity:0;height:0;width:0">
 
-      <div class="field" id="f-confirm" style="margin-bottom:0">
-        <label class="agree" id="confirmBox" for="confirm" style="margin-top:.5rem">
-          <input type="checkbox" id="confirm">
-          <span>ข้าพเจ้าขอ<b>ยืนยัน</b>ว่าข้อมูลข้างต้นเป็นข้อมูลของข้าพเจ้าและถูกต้องตามความเป็นจริง</span>
-        </label>
-        <p class="err">กรุณากดเครื่องหมายถูกเพื่อยืนยันข้อมูล</p>
-      </div>
-
-      <button class="btn btn-wait" id="submitBtn" type="submit">
-        <span id="submitText">บันทึกข้อมูล</span>
+      <button class="btn btn-wait" id="nextBtn" type="submit">
+        <span id="nextText">ถัดไป · อ่านข้อความยืนยัน</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
-      <p class="locked-note" id="readyNote" aria-live="polite">ยังกรอกไม่ครบ · เหลืออีก 5 ช่อง</p>
-      <button class="btn btn-ghost" id="backBtn" type="button" style="margin-top:.7rem">ย้อนกลับ</button>
+      <p class="locked-note" id="readyNote" aria-live="polite">ยังกรอกไม่ครบ · เหลืออีก 4 ช่อง</p>
     </form>
+  </section>
+
+  <!-- ═══ ขั้นตอนที่ 2 : ข้อความยืนยันและให้ความยินยอม ═══ -->
+  <section class="card screen hidden" id="screen2">
+    <h2>ข้อความยืนยันตัวตน</h2>
+    <p class="lead">กรุณาอ่านข้อความด้านล่าง ตรวจสอบข้อมูลของท่านให้ถูกต้อง แล้วกดยินยอมค่ะ</p>
+
+    <div class="alert" id="declAlert" role="alert"></div>
+
+    <a class="pdf-link hidden" id="pdfLink" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      เปิดอ่านเอกสาร PDPA ฉบับเต็ม (PDF)
+    </a>
+
+    <div class="decl" id="declText"></div>
+
+    <div class="decl-info" id="declInfo"></div>
+
+    <label class="agree" id="agreeBox" for="consent">
+      <input type="checkbox" id="consent">
+      <span>ข้าพเจ้าได้อ่านและเข้าใจข้อความข้างต้นแล้ว และ<b>ยินยอม</b>ตามข้อความดังกล่าวทุกประการ</span>
+    </label>
+
+    <button class="btn" id="submitBtn" type="button" disabled>
+      <span id="submitText">ยินยอม และบันทึกข้อมูล</span>
+    </button>
+    <p class="locked-note" id="lockedNote">กดเครื่องหมายถูกในกรอบด้านบนก่อน จึงจะบันทึกได้</p>
+    <button class="btn btn-ghost" id="backBtn" type="button" style="margin-top:.7rem">ย้อนกลับ · แก้ไขข้อมูล</button>
   </section>
 
   <!-- ═══ ขั้นตอนที่ 3 : สำเร็จ ═══ -->
@@ -552,8 +581,25 @@ input:focus,select:focus{ border-color:var(--green); }
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
     <h2>บันทึกข้อมูลเรียบร้อยแล้ว</h2>
-    <p class="lead" style="margin-bottom:0">ขอบคุณค่ะ ทางตัวแทนลูกบ้านได้รับข้อมูลของท่านแล้ว</p>
+    <p class="lead" style="margin-bottom:0">ขอบคุณค่ะ ทางตัวแทนลูกบ้านได้รับข้อมูลและหลักฐานการยินยอมของท่านแล้ว</p>
     <dl class="summary" id="summary"></dl>
+
+    <div class="evidence">
+      <h3>เก็บหลักฐานไว้กับตัวท่านเอง</h3>
+      <p>ท่านสามารถพิมพ์ออกกระดาษ หรือบันทึกเป็นรูปภาพเก็บไว้ในเครื่องได้ค่ะ</p>
+      <div class="ev-row">
+        <button type="button" class="ev-btn" id="printBtn">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg>
+          พิมพ์เอกสาร
+        </button>
+        <button type="button" class="ev-btn" id="saveImgBtn">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          บันทึกเป็นรูปภาพ
+        </button>
+      </div>
+      <p class="ev-link" id="evLink"></p>
+    </div>
+
     <button class="btn btn-ghost" id="againBtn" type="button" style="margin-top:1.4rem">กรอกข้อมูลให้บ้านหลังอื่นอีกครั้ง</button>
   </section>
   </main>
@@ -577,10 +623,10 @@ input:focus,select:focus{ border-color:var(--green); }
     <h3>เข้ากลุ่ม LINE ของหมู่บ้าน</h3>
     <p>สแกน QR Code นี้ด้วยกล้องมือถือ หรือ<b>กดที่รูป</b>เพื่อเข้า LINE ได้ทันทีค่ะ</p>
     <a class="qr-link" id="qrLink" href="https://lin.ee/TN8LooM" target="_blank" rel="noopener"
-       aria-label="เพิ่มเพื่อน LINE Official Account ของหมู่บ้าน">
-      <img class="qr" src="line-qr.png" alt="QR Code สำหรับเพิ่มเพื่อน LINE Official Account ของหมู่บ้าน" width="540" height="540">
+       aria-label="เพิ่มเพื่อน LINE Official Account ของตัวแทนลูกบ้าน">
+      <img class="qr" src="line-qr.png" alt="QR Code สำหรับเพิ่มเพื่อน LINE Official Account ของตัวแทนลูกบ้าน" width="540" height="540">
     </a>
-    <p class="qr-cap">LINE Official Account · หมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่</p>
+    <p class="qr-cap">LINE Official Account · ตัวแทนลูกบ้าน 74 ไร่</p>
     <a class="line-btn" id="lineBtn" href="https://lin.ee/TN8LooM" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true" style="margin-right:.5rem"><path d="M12 2C6.5 2 2 5.7 2 10.2c0 4 3.6 7.4 8.4 8 .3.07.8.23.9.53.08.27.05.7.03.97l-.15.9c-.04.27-.2 1.05.93.57s6.1-3.6 8.32-6.16C21.9 13.3 22 11.8 22 10.2 22 5.7 17.5 2 12 2z"/></svg>
       เพิ่มเพื่อนใน LINE
@@ -594,11 +640,31 @@ input:focus,select:focus{ border-color:var(--green); }
   </p>
 </div>
 
+<!-- ═══ เนื้อหาสำหรับสั่งพิมพ์เท่านั้น ═══ -->
+<div id="printArea">
+  <h1>หนังสือยืนยันตัวตนลูกบ้าน</h1>
+  <p class="pr-sub">หมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่</p>
+  <div class="pr-body" id="prBody"></div>
+  <div class="pr-info" id="prInfo"></div>
+  <div class="pr-sign" id="prSign"></div>
+  <p class="pr-foot">เอกสารนี้จัดทำโดยระบบยืนยันข้อมูลลูกบ้านโดยอัตโนมัติ</p>
+</div>
+
 <script>
 (function(){
   "use strict";
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[<>&"]/g, (c) => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", '"':"&quot;" }[c]));
+
+  const เดือนไทย = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                    'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  function วันที่ไทย(d){
+    return d.getDate() + " " + เดือนไทย[d.getMonth()] + " พ.ศ. " + (d.getFullYear() + 543);
+  }
+  function เวลาไทย(d){
+    const n = (x) => String(x).padStart(2, "0");
+    return n(d.getHours()) + ":" + n(d.getMinutes()) + " น.";
+  }
 
   /* ── นำค่าตั้งค่าไปใช้ ─────────────────── */
   if (CONFIG.villageName) {
@@ -607,7 +673,6 @@ input:focus,select:focus{ border-color:var(--green); }
   }
   if (CONFIG.pdpaPdfUrl) {
     const l = $("pdfLink"); l.href = CONFIG.pdpaPdfUrl; l.classList.remove("hidden");
-    $("draftNote").classList.add("hidden");
   }
   if (CONFIG.lineUrl) {
     $("lineBtn").href = CONFIG.lineUrl;
@@ -616,7 +681,6 @@ input:focus,select:focus{ border-color:var(--green); }
     $("lineBtn").classList.add("hidden");
   }
   if (CONFIG.contactPhone) {
-    $("docPhone").textContent = "โทร. " + CONFIG.contactPhone;
     $("footPhone").innerHTML = "โทร. " + CONFIG.contactPhone + "<br>";
   }
 
@@ -688,21 +752,11 @@ input:focus,select:focus{ border-color:var(--green); }
       $("steps").classList.remove("hidden");
       $("bar2").classList.toggle("on", n === 2);
       $("stepsLabel").textContent = n === 1
-        ? "ขั้นตอนที่ 1 จาก 2 · อ่านและให้ความยินยอม"
-        : "ขั้นตอนที่ 2 จาก 2 · กรอกข้อมูลของท่าน";
+        ? "ขั้นตอนที่ 1 จาก 2 · กรอกข้อมูลของท่าน"
+        : "ขั้นตอนที่ 2 จาก 2 · อ่านข้อความและให้ความยินยอม";
     }
     window.scrollTo({ top:0, behavior:"smooth" });
   }
-
-  /* ── ขั้นที่ 1 : ยินยอม ───────────────── */
-  const consent = $("consent"), agreeBox = $("agreeBox"), toStep2 = $("toStep2");
-  consent.addEventListener("change", () => {
-    agreeBox.classList.toggle("checked", consent.checked);
-    toStep2.disabled = !consent.checked;
-    $("lockedNote").style.visibility = consent.checked ? "hidden" : "visible";
-  });
-  toStep2.addEventListener("click", () => { if (consent.checked) { show(2); $("fullName").focus({preventScroll:true}); } });
-  $("backBtn").addEventListener("click", () => show(1));
 
   /* ── ไฮไลต์ตัวเลือกที่เลือก ───────────── */
   document.querySelectorAll('input[name="status"]').forEach((r) => {
@@ -712,11 +766,6 @@ input:focus,select:focus{ border-color:var(--green); }
       $("f-status").classList.remove("bad");
     });
   });
-  const confirmCb = $("confirm"), confirmBox = $("confirmBox");
-  confirmCb.addEventListener("change", () => {
-    confirmBox.classList.toggle("checked", confirmCb.checked);
-    if (confirmCb.checked) $("f-confirm").classList.remove("bad");
-  });
 
   /* ── เบอร์โทร: รับเฉพาะตัวเลข ─────────── */
   const phone = $("phone");
@@ -725,7 +774,6 @@ input:focus,select:focus{ border-color:var(--green); }
   /* ── ตรวจสอบข้อมูล ────────────────────── */
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-  // แยก "สมชาย ใจดี" เป็นชื่อและนามสกุล เพื่อเก็บลง Google Sheets คนละคอลัมน์
   function splitName(v){
     const parts = String(v || "").trim().replace(/\s+/g, " ").split(" ");
     const first = parts.shift() || "";
@@ -759,7 +807,6 @@ input:focus,select:focus{ border-color:var(--green); }
     }
   }
 
-  // สอบถามข้อมูลจาก Google Sheets ล่วงหน้า เพื่อบอกผู้ใช้ก่อนกรอกจนจบ
   async function precheck(){
     const house = $("houseNo").value.trim(), status = selStatus();
     if (!house || !status || !CONFIG.scriptUrl) {
@@ -771,14 +818,13 @@ input:focus,select:focus{ border-color:var(--green); }
       const url = CONFIG.scriptUrl + "?houseNo=" + encodeURIComponent(house) +
                   "&status=" + encodeURIComponent(status);
       const d = await (await fetch(url)).json();
-      if (normHouse($("houseNo").value.trim()) + "|" + selStatus() !== key) return; // ผู้ใช้แก้ไปแล้ว
+      if (normHouse($("houseNo").value.trim()) + "|" + selStatus() !== key) return;
       dup = { key, taken: !!d.taken, name: d.name || "", date: d.date || "" };
       showDup({ taken: dup.taken, houseNo: house, status, name: dup.name, date: dup.date });
       updateReady();
     } catch (err) { /* ตรวจล่วงหน้าไม่สำเร็จก็ไม่เป็นไร ระบบจะตรวจอีกครั้งตอนบันทึก */ }
   }
 
-  // รายการเงื่อนไขทั้งหมดที่ต้องผ่านก่อนบันทึกได้
   function checks(){
     const em = $("email").value.trim();
     return [
@@ -786,27 +832,24 @@ input:focus,select:focus{ border-color:var(--green); }
       ["f-houseNo",   $("houseNo").value.trim().length > 0],
       ["f-phone",     /^\d{9,10}$/.test($("phone").value.trim())],
       ["f-email",     CONFIG.requireEmail ? EMAIL_RE.test(em) : (em === "" || EMAIL_RE.test(em))],
-      ["f-status",    !!selStatus()],
-      ["f-confirm",   confirmCb.checked]
+      ["f-status",    !!selStatus()]
     ];
   }
 
-  // อัปเดตปุ่มบันทึกและข้อความใต้ปุ่มแบบเรียลไทม์
   const readyNote = $("readyNote");
   function updateReady(){
     const left = checks().filter(([, ok]) => !ok).length;
     const done = left === 0 && !dup.taken;
-    $("submitBtn").classList.toggle("btn-wait", !done);
+    $("nextBtn").classList.toggle("btn-wait", !done);
     readyNote.classList.toggle("readyNote-ok", done);
     readyNote.textContent = dup.taken
       ? "บ้านเลขที่นี้ลงทะเบียนสถานะนี้ไว้แล้ว จึงบันทึกซ้ำไม่ได้"
-      : (done ? "✓ กรอกข้อมูลครบแล้ว กดปุ่มบันทึกข้อมูลได้เลยค่ะ"
+      : (done ? "✓ กรอกข้อมูลครบแล้ว กดปุ่มถัดไปได้เลยค่ะ"
               : "ยังกรอกไม่ครบ · เหลืออีก " + left + " ช่อง");
     if (done) $("formAlert").classList.remove("show");
     return done;
   }
 
-  // ตรวจตอนกดบันทึก: ทำเครื่องหมายแดง + เลื่อนหน้าจอไปยังช่องแรกที่ยังไม่ครบ
   function validate(){
     const list = checks();
     let firstBad = null;
@@ -849,10 +892,318 @@ input:focus,select:focus{ border-color:var(--green); }
   document.querySelectorAll('input[name="status"]').forEach((r) => {
     r.addEventListener("change", () => { dup = { key:"", taken:false }; showDup(null); updateReady(); precheck(); });
   });
-  confirmCb.addEventListener("change", updateReady);
   updateReady();
 
-  /* ── ตรวจการเชื่อมต่อฐานข้อมูลตั้งแต่เปิดหน้า ── */
+  /* ── เก็บข้อมูลของผู้กรอกไว้ใช้ทั้งระบบ ── */
+  let record = null;
+
+  function readForm(){
+    const who = splitName($("fullName").value);
+    return {
+      firstName: who.first,
+      lastName:  who.last,
+      fullName:  who.full,
+      houseNo:   $("houseNo").value.trim(),
+      phone:     $("phone").value.trim(),
+      email:     $("email").value.trim(),
+      status:    selStatus()
+    };
+  }
+
+  // ข้อความยืนยันตามที่ตัวแทนลูกบ้านกำหนด
+  function statementHTML(d){
+    const f = (v) => '<span class="fill">' + esc(v) + '</span>';
+    return [
+      "ข้าพเจ้า (นาย/นาง/นางสาว) " + f(d.firstName) + " นามสกุล " + f(d.lastName) +
+      " ขอยืนยันกับตัวแทนลูกบ้านว่า LINE ID ที่ใช้เข้าร่วมในกลุ่มนี้ เป็น LINE ID ของข้าพเจ้าอย่างแท้จริง " +
+      "โดยข้าพเจ้าเป็น" + f(d.status) + "ของบ้านเลขที่ " + f(d.houseNo),
+
+      "ทั้งนี้ ข้าพเจ้ายินยอมให้ตัวแทนลูกบ้านใช้ข้อมูลข้างต้นในการติดต่อสื่อสาร และเพื่อยืนยันตัวตนว่าเป็นลูกบ้าน" +
+      "ในโครงการ เพอร์เฟค มาสเตอร์พีซ เซนจูรี่ จริง",
+
+      "ในการนี้ ข้าพเจ้ารับทราบและตกลงว่า การดำเนินการต่างๆ โดยตัวแทนลูกบ้าน เป็นเพียงการจัดการและประสานงาน" +
+      "เพื่อประโยชน์ของลูกบ้าน ซึ่งการดำเนินการดังกล่าวอยู่บนพื้นฐานที่ว่า การติดต่อสื่อสารทั้งหมดในกลุ่มนี้ถูกต้อง " +
+      "และกระทำโดยลูกบ้าน/เจ้าของบ้านตามที่กล่าวอ้างจริง โดยตัวแทนลูกบ้านจะไม่รับผิดชอบต่อความเสียหายใดๆ " +
+      "ที่เกิดจากการใช้ LINE ID โดยบุคคลอื่นที่ไม่ใช่เจ้าของบ้าน การติดต่อสื่อสารแอบอ้าง หรือกรณีอื่นใด"
+    ];
+  }
+
+  // ข้อความเดียวกันแบบไม่มีแท็ก สำหรับพิมพ์และวาดเป็นรูปภาพ
+  function statementPlain(d){
+    return statementHTML(d).map((h) => h.replace(/<[^>]+>/g, ""));
+  }
+
+  function infoRows(d){
+    return [
+      ["ชื่อ และนามสกุล", d.fullName],
+      ["เลขที่บ้าน", d.houseNo],
+      ["เบอร์โทรศัพท์", d.phone],
+      ["อีเมล", d.email || "–"],
+      ["สถานะ", d.status]
+    ];
+  }
+
+  /* ── ขั้นที่ 1 → 2 ─────────────────────── */
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if ($("website").value) return;   // บอทกรอก honeypot
+    if (!validate()) return;
+
+    record = readForm();
+
+    $("declText").innerHTML = statementHTML(record).map((p) => "<p>" + p + "</p>").join("");
+    $("declInfo").innerHTML = infoRows(record).map(([k, v]) =>
+      "<div><span>" + k + "</span><span>" + esc(v) + "</span></div>").join("");
+
+    $("consent").checked = false;
+    $("agreeBox").classList.remove("checked");
+    $("submitBtn").disabled = true;
+    $("lockedNote").style.visibility = "visible";
+    $("declAlert").classList.remove("show");
+    show(2);
+  });
+
+  $("backBtn").addEventListener("click", () => show(1));
+
+  const consent = $("consent");
+  consent.addEventListener("change", () => {
+    $("agreeBox").classList.toggle("checked", consent.checked);
+    $("submitBtn").disabled = !consent.checked;
+    $("lockedNote").style.visibility = consent.checked ? "hidden" : "visible";
+  });
+
+  /* ── วาดหลักฐานเป็นรูปภาพด้วย Canvas ──── */
+  function wrapThai(ctx, text, maxWidth){
+    const lines = [];
+    let line = "";
+    const combining = /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/;
+    for (let i = 0; i < text.length; i++) {
+      const test = line + text[i];
+      if (ctx.measureText(test).width > maxWidth && line !== "") {
+        let cut = line.length;
+        const sp = line.lastIndexOf(" ");
+        if (sp > maxWidth / 40) cut = sp;            // ตัดที่ช่องว่างถ้ามี
+        let head = line.slice(0, cut);
+        let tail = line.slice(cut).replace(/^ /, "");
+        while (tail && combining.test(tail[0])) {     // ไม่ให้สระ/วรรณยุกต์ขึ้นต้นบรรทัด
+          head += tail[0]; tail = tail.slice(1);
+        }
+        lines.push(head);
+        line = tail + text[i];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  async function makeEvidenceImage(d, when){
+    try { await document.fonts.load('400 26px "Sarabun"'); await document.fonts.ready; } catch(e){}
+
+    const W = 1000, PAD = 60, MAXW = W - PAD * 2;
+    const c = document.createElement("canvas");
+    const ctx = c.getContext("2d");
+    const F = (w, s) => w + " " + s + 'px "Sarabun", sans-serif';
+
+    // รอบแรก: คำนวณความสูงที่ต้องใช้
+    const paras = statementPlain(d);
+    ctx.font = F(400, 26);
+    const wrapped = paras.map((p) => wrapThai(ctx, "        " + p, MAXW));
+    const rows = infoRows(d);
+    let H = 250;                                   // หัวเอกสาร
+    wrapped.forEach((ls) => { H += ls.length * 44 + 22; });
+    H += 40 + rows.length * 44 + 40;               // ตารางข้อมูล
+    H += 200;                                      // ส่วนท้าย
+    c.width = W; c.height = H;
+
+    const ctx2 = c.getContext("2d");
+    ctx2.fillStyle = "#FFFFFF"; ctx2.fillRect(0, 0, W, H);
+    ctx2.fillStyle = "#12833C"; ctx2.fillRect(0, 0, W, 10);
+
+    let y = 78;
+    ctx2.textBaseline = "alphabetic";
+    ctx2.fillStyle = "#12354F";
+    ctx2.textAlign = "center";
+    ctx2.font = F(700, 38);
+    ctx2.fillText("หนังสือยืนยันตัวตนลูกบ้าน", W / 2, y); y += 44;
+    ctx2.font = F(400, 24);
+    ctx2.fillStyle = "#4E7291";
+    ctx2.fillText("หมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่", W / 2, y); y += 46;
+
+    ctx2.strokeStyle = "#C6DDEF"; ctx2.lineWidth = 2;
+    ctx2.beginPath(); ctx2.moveTo(PAD, y); ctx2.lineTo(W - PAD, y); ctx2.stroke();
+    y += 48;
+
+    ctx2.textAlign = "left";
+    ctx2.fillStyle = "#12354F";
+    ctx2.font = F(400, 26);
+    wrapped.forEach((ls) => {
+      ls.forEach((ln) => { ctx2.fillText(ln, PAD, y); y += 44; });
+      y += 22;
+    });
+
+    y += 12;
+    const boxTop = y - 28;
+    const boxH = rows.length * 44 + 34;
+    ctx2.fillStyle = "#F4F9FD";
+    ctx2.strokeStyle = "#C6DDEF";
+    ctx2.beginPath();
+    ctx2.roundRect ? ctx2.roundRect(PAD, boxTop, MAXW, boxH, 12) : ctx2.rect(PAD, boxTop, MAXW, boxH);
+    ctx2.fill(); ctx2.stroke();
+    y = boxTop + 44;
+    rows.forEach(([k, v]) => {
+      ctx2.font = F(400, 24); ctx2.fillStyle = "#4E7291";
+      ctx2.textAlign = "left"; ctx2.fillText(k, PAD + 22, y);
+      ctx2.font = F(600, 24); ctx2.fillStyle = "#12354F";
+      ctx2.textAlign = "right"; ctx2.fillText(String(v), W - PAD - 22, y);
+      y += 44;
+    });
+
+    y = boxTop + boxH + 60;
+    ctx2.textAlign = "right";
+    ctx2.font = F(600, 26); ctx2.fillStyle = "#12833C";
+    ctx2.fillText("✓ ให้ความยินยอมแล้ว", W - PAD, y); y += 40;
+    ctx2.font = F(400, 24); ctx2.fillStyle = "#12354F";
+    ctx2.fillText("เมื่อวันที่ " + วันที่ไทย(when) + " เวลา " + เวลาไทย(when), W - PAD, y); y += 52;
+
+    ctx2.textAlign = "center";
+    ctx2.font = F(400, 20); ctx2.fillStyle = "#7C93A6";
+    ctx2.fillText("เอกสารนี้จัดทำโดยระบบยืนยันข้อมูลลูกบ้านโดยอัตโนมัติ", W / 2, y);
+
+    return c.toDataURL("image/png");
+  }
+
+  /* ── ส่งข้อมูล ────────────────────────── */
+  const submitBtn = $("submitBtn"), submitText = $("submitText");
+  let sending = false, evidenceData = null, evidenceName = "";
+
+  function setSending(on, label){
+    sending = on;
+    submitBtn.disabled = on;
+    submitText.innerHTML = on
+      ? '<span class="spin" style="display:inline-block;vertical-align:-3px;margin-right:.5rem"></span>' + label
+      : "ยินยอม และบันทึกข้อมูล";
+  }
+
+  submitBtn.addEventListener("click", async () => {
+    if (sending || !consent.checked || !record) return;
+
+    const when = new Date();
+    const alertBox = $("declAlert");
+    alertBox.classList.remove("show");
+
+    setSending(true, "กำลังจัดทำหลักฐาน…");
+    try {
+      evidenceData = await makeEvidenceImage(record, when);
+      evidenceName = "ยืนยันตัวตน_" + record.houseNo.replace(/\//g, "-") + "_" +
+                     record.status + "_" + record.fullName.replace(/\s+/g, "-");
+
+      setSending(true, "กำลังบันทึกข้อมูล…");
+
+      if (!CONFIG.scriptUrl) throw new Error("ยังไม่ได้ตั้งค่า scriptUrl ในไฟล์ index.html");
+
+      const body = new URLSearchParams({
+        fullName:  record.fullName,
+        houseNo:   record.houseNo,
+        phone:     record.phone,
+        email:     record.email,
+        status:    record.status,
+        consent:   "ยินยอม",
+        confirmed: "ยืนยันข้อมูลถูกต้อง",
+        agreedAt:  วันที่ไทย(when) + " " + เวลาไทย(when),
+        evidence:  evidenceData,
+        evidenceName: evidenceName
+      });
+
+      const res = await fetch(CONFIG.scriptUrl, { method:"POST", body });
+      const text = await res.text();
+      let out = null;
+      try { out = JSON.parse(text); } catch (e) { out = null; }
+      if (!out || typeof out.ok === "undefined") throw new Error("CONNECT");
+
+      if (out.code === "duplicate") {
+        dup = { key: normHouse(record.houseNo) + "|" + record.status, taken: true,
+                name: out.name || "", date: out.date || "" };
+        showDup({ taken:true, houseNo:record.houseNo, status:record.status, name:out.name, date:out.date });
+        updateReady();
+        alertBox.textContent = "บ้านเลขที่ " + record.houseNo + " สถานะ" + record.status +
+                               " ลงทะเบียนไว้แล้ว จึงบันทึกซ้ำไม่ได้ กรุณากดย้อนกลับเพื่อแก้ไขข้อมูลค่ะ";
+        alertBox.classList.add("show");
+        alertBox.scrollIntoView({ behavior:"smooth", block:"center" });
+        return;
+      }
+      if (out.ok !== true) throw new Error(out.message || "บันทึกไม่สำเร็จ");
+
+      console.log("[บันทึกสำเร็จ] ไฟล์:", out.file, "| แถวที่:", out.row, "| หลักฐาน:", out.evidenceUrl || "-");
+      finish(record, when, out);
+
+    } catch (err) {
+      const msg = err && err.message ? err.message : "";
+      alertBox.textContent = (msg === "CONNECT")
+        ? "ยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้าน"
+        : "บันทึกข้อมูลไม่สำเร็จ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาลองใหม่อีกครั้ง" + (msg ? " (" + msg + ")" : "");
+      alertBox.classList.add("show");
+      alertBox.scrollIntoView({ behavior:"smooth", block:"center" });
+      console.error("[บันทึกไม่สำเร็จ]", err);
+    } finally {
+      setSending(false);
+    }
+  });
+
+  /* ── หน้าสำเร็จ + หลักฐาน ─────────────── */
+  function finish(d, when, out){
+    $("summary").innerHTML = infoRows(d).map(([k, v]) =>
+      "<div><dt>" + k + "</dt><dd>" + esc(v) + "</dd></div>").join("") +
+      "<div><dt>ยินยอมเมื่อ</dt><dd>" + esc(วันที่ไทย(when) + " " + เวลาไทย(when)) + "</dd></div>";
+
+    // เตรียมเนื้อหาสำหรับสั่งพิมพ์
+    $("prBody").innerHTML = statementPlain(d).map((p) => "<p>" + esc(p) + "</p>").join("");
+    $("prInfo").innerHTML = infoRows(d).map(([k, v]) =>
+      "<div><span>" + k + "</span><span><b>" + esc(v) + "</b></span></div>").join("");
+    $("prSign").innerHTML = "ให้ความยินยอมเมื่อวันที่ " + esc(วันที่ไทย(when)) +
+                            " เวลา " + esc(เวลาไทย(when));
+
+    $("evLink").innerHTML = out && out.evidenceUrl
+      ? 'ตัวแทนลูกบ้านได้จัดเก็บสำเนาหลักฐานไว้เรียบร้อยแล้ว'
+      : "";
+    show(3);
+  }
+
+  $("printBtn").addEventListener("click", () => window.print());
+
+  $("saveImgBtn").addEventListener("click", async () => {
+    const btn = $("saveImgBtn");
+    const old = btn.innerHTML;
+    btn.innerHTML = "กำลังสร้างรูป…";
+    try {
+      if (!evidenceData) evidenceData = await makeEvidenceImage(record, new Date());
+      const a = document.createElement("a");
+      a.href = evidenceData;
+      a.download = (evidenceName || "ยืนยันตัวตนลูกบ้าน") + ".png";
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch (e) {
+      alert("บันทึกรูปไม่สำเร็จ กรุณาใช้วิธีจับภาพหน้าจอแทนค่ะ");
+    } finally {
+      btn.innerHTML = old;
+    }
+  });
+
+  /* ── กรอกให้บ้านหลังอื่นต่อ ───────────── */
+  $("againBtn").addEventListener("click", () => {
+    $("form").reset();
+    document.querySelectorAll(".opt").forEach((o) => o.classList.remove("checked"));
+    document.querySelectorAll(".field").forEach((f) => f.classList.remove("bad"));
+    $("formAlert").classList.remove("show");
+    dup = { key:"", taken:false }; showDup(null);
+    $("houseNo").classList.add("empty");
+    record = null; evidenceData = null; evidenceName = "";
+    updateReady();
+    show(1);
+    $("fullName").focus({ preventScroll:true });
+  });
+
+  /* ── ตรวจการเชื่อมต่อตั้งแต่เปิดหน้า ──── */
   (async function pingServer(){
     if (!CONFIG.scriptUrl) return;
     let ok = false;
@@ -864,119 +1215,11 @@ input:focus,select:focus{ border-color:var(--green); }
       const a = $("formAlert");
       a.textContent = "⚠️ ขณะนี้ระบบยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลที่กรอกจะยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้านก่อนค่ะ";
       a.classList.add("show");
-      console.error("[ตรวจสอบ] เรียก Apps Script ไม่สำเร็จ — ตรวจว่า Deploy เป็น Web app / Execute as: Me / Who has access: Anyone และได้ Deploy เวอร์ชันใหม่หลังวางโค้ดแล้ว");
+      console.error("[ตรวจสอบ] เรียก Apps Script ไม่สำเร็จ");
     } else {
       console.log("[ตรวจสอบ] เชื่อมต่อ Google Apps Script สำเร็จ");
     }
   })();
-
-  /* ── ส่งข้อมูล ────────────────────────── */
-  const form = $("form"), submitBtn = $("submitBtn"), submitText = $("submitText");
-  let sending = false;
-
-  function setSending(on){
-    sending = on;
-    submitBtn.disabled = on;
-    submitText.innerHTML = on
-      ? '<span class="spin" style="display:inline-block;vertical-align:-3px;margin-right:.5rem"></span>กำลังบันทึก…'
-      : "บันทึกข้อมูล";
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (sending) return;
-    if ($("website").value) return;          // บอทกรอก honeypot
-    if (!validate()) return;
-
-    const who = splitName($("fullName").value);
-    const data = {
-      fullName:  who.full,
-      houseNo:   $("houseNo").value.trim(),
-      phone:     $("phone").value.trim(),
-      email:     $("email").value.trim(),
-      status:    document.querySelector('input[name="status"]:checked').value,
-      consent:   "ยินยอม",
-      confirmed: "ยืนยันข้อมูลถูกต้อง",
-      submittedAt: new Date().toISOString()
-    };
-
-    if (!CONFIG.scriptUrl) {
-      const a = $("formAlert");
-      a.textContent = "ยังไม่ได้เชื่อมต่อ Google Sheets — กรุณาใส่ scriptUrl ในไฟล์ index.html ก่อนเปิดใช้งานจริง (ดูขั้นตอนในไฟล์ README)";
-      a.classList.add("show");
-      a.scrollIntoView({ behavior:"smooth", block:"center" });
-      return;
-    }
-
-    setSending(true);
-    try {
-      const res = await fetch(CONFIG.scriptUrl, {
-        method: "POST",
-        body: new URLSearchParams(data)     // ไม่ตั้ง header เพื่อเลี่ยงปัญหา CORS
-      });
-      const text = await res.text();
-      let out = null;
-      try { out = JSON.parse(text); } catch (e) { out = null; }
-
-      // ถ้าคำตอบไม่ใช่ JSON แปลว่าไม่ได้คุยกับสคริปต์จริง (มักเป็นหน้าขอสิทธิ์ของ Google)
-      if (!out || typeof out.ok === "undefined") {
-        throw new Error("CONNECT");
-      }
-
-      if (out.code === "duplicate") {          // มีคนลงบ้านเลขที่นี้ในสถานะนี้แล้ว
-        dup = { key: normHouse(data.houseNo) + "|" + data.status, taken: true,
-                name: out.name || "", date: out.date || "" };
-        showDup({ taken:true, houseNo:data.houseNo, status:data.status, name:out.name, date:out.date });
-        $("f-status").classList.add("bad");
-        updateReady();
-        dupNotice.scrollIntoView({ behavior:"smooth", block:"center" });
-        return;
-      }
-      if (out.ok !== true) throw new Error(out.message || "บันทึกไม่สำเร็จ");
-      console.log("[บันทึกสำเร็จ] ไฟล์:", out.file, "| แท็บ:", out.tab, "| แถวที่:", out.row);
-      finish(data);
-    } catch (err) {
-      const a = $("formAlert");
-      const msg = err && err.message ? err.message : "";
-      a.textContent = (msg === "CONNECT")
-        ? "ยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้าน"
-        : ("บันทึกข้อมูลไม่สำเร็จ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาลองใหม่อีกครั้ง" +
-           (msg && msg !== "CONNECT" ? " (" + msg + ")" : ""));
-      console.error("[บันทึกไม่สำเร็จ]", err);
-      a.classList.add("show");
-      a.scrollIntoView({ behavior:"smooth", block:"center" });
-    } finally {
-      setSending(false);
-    }
-  });
-
-  function finish(d){
-    const rows = [
-      ["ชื่อ และนามสกุล", d.fullName],
-      ["เลขที่บ้าน", d.houseNo],
-      ["เบอร์โทรศัพท์", d.phone],
-      ["อีเมล", d.email || "–"],
-      ["สถานะ", d.status]
-    ];
-    $("summary").innerHTML = rows.map(([k,v]) =>
-      `<div><dt>${k}</dt><dd>${String(v).replace(/[<>&]/g, (c)=>({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]))}</dd></div>`
-    ).join("");
-    show(3);
-  }
-
-  /* ── กรอกให้บ้านหลังอื่นต่อ ───────────── */
-  $("againBtn").addEventListener("click", () => {
-    form.reset();
-    document.querySelectorAll(".opt").forEach((o) => o.classList.remove("checked"));
-    document.querySelectorAll(".field").forEach((f) => f.classList.remove("bad"));
-    confirmBox.classList.remove("checked");
-    $("formAlert").classList.remove("show");
-    dup = { key:"", taken:false }; showDup(null);
-    $("houseNo").classList.add("empty");
-    updateReady();
-    show(2);
-    $("fullName").focus({preventScroll:true});
-  });
 })();
 </script>
 </body>
