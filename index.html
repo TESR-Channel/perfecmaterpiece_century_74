@@ -849,6 +849,24 @@ input:focus,select:focus{ border-color:var(--green); }
   confirmCb.addEventListener("change", updateReady);
   updateReady();
 
+  /* ── ตรวจการเชื่อมต่อฐานข้อมูลตั้งแต่เปิดหน้า ── */
+  (async function pingServer(){
+    if (!CONFIG.scriptUrl) return;
+    let ok = false;
+    try {
+      const t = await (await fetch(CONFIG.scriptUrl)).text();
+      ok = JSON.parse(t).ok === true;
+    } catch (e) { ok = false; }
+    if (!ok) {
+      const a = $("formAlert");
+      a.textContent = "⚠️ ขณะนี้ระบบยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลที่กรอกจะยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้านก่อนค่ะ";
+      a.classList.add("show");
+      console.error("[ตรวจสอบ] เรียก Apps Script ไม่สำเร็จ — ตรวจว่า Deploy เป็น Web app / Execute as: Me / Who has access: Anyone และได้ Deploy เวอร์ชันใหม่หลังวางโค้ดแล้ว");
+    } else {
+      console.log("[ตรวจสอบ] เชื่อมต่อ Google Apps Script สำเร็จ");
+    }
+  })();
+
   /* ── ส่งข้อมูล ────────────────────────── */
   const form = $("form"), submitBtn = $("submitBtn"), submitText = $("submitText");
   let sending = false;
@@ -894,7 +912,14 @@ input:focus,select:focus{ border-color:var(--green); }
         method: "POST",
         body: new URLSearchParams(data)     // ไม่ตั้ง header เพื่อเลี่ยงปัญหา CORS
       });
-      const out = await res.json().catch(() => ({ ok: res.ok }));
+      const text = await res.text();
+      let out = null;
+      try { out = JSON.parse(text); } catch (e) { out = null; }
+
+      // ถ้าคำตอบไม่ใช่ JSON แปลว่าไม่ได้คุยกับสคริปต์จริง (มักเป็นหน้าขอสิทธิ์ของ Google)
+      if (!out || typeof out.ok === "undefined") {
+        throw new Error("CONNECT");
+      }
 
       if (out.code === "duplicate") {          // มีคนลงบ้านเลขที่นี้ในสถานะนี้แล้ว
         dup = { key: normHouse(data.houseNo) + "|" + data.status, taken: true,
@@ -905,11 +930,13 @@ input:focus,select:focus{ border-color:var(--green); }
         dupNotice.scrollIntoView({ behavior:"smooth", block:"center" });
         return;
       }
-      if (!out.ok) throw new Error(out.message || "บันทึกไม่สำเร็จ");
+      if (out.ok !== true) throw new Error(out.message || "บันทึกไม่สำเร็จ");
       finish(data);
     } catch (err) {
       const a = $("formAlert");
-      a.textContent = "ส่งข้อมูลไม่สำเร็จ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตแล้วกดส่งอีกครั้ง";
+      a.textContent = (err && err.message === "CONNECT")
+        ? "ยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลของท่านยังไม่ถูกบันทึก กรุณาแจ้งตัวแทนลูกบ้าน (รหัสปัญหา: การตั้งค่าสิทธิ์ Apps Script)"
+        : "บันทึกข้อมูลไม่สำเร็จ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตแล้วกดบันทึกอีกครั้ง";
       a.classList.add("show");
       a.scrollIntoView({ behavior:"smooth", block:"center" });
     } finally {
