@@ -471,16 +471,11 @@ input:focus,select:focus{ border-color:var(--green); }
     </button>
 
     <form id="form" novalidate autocomplete="on">
-      <div class="field" id="f-firstName">
-        <label for="firstName">ชื่อ <span class="req">*</span></label>
-        <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="เช่น สมชาย" enterkeyhint="next">
-        <p class="err">กรุณากรอกชื่อ</p>
-      </div>
-
-      <div class="field" id="f-lastName">
-        <label for="lastName">นามสกุล <span class="req">*</span></label>
-        <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="เช่น ใจดี" enterkeyhint="next">
-        <p class="err">กรุณากรอกนามสกุล</p>
+      <div class="field" id="f-fullName">
+        <label for="fullName">ชื่อ และนามสกุล <span class="req">*</span></label>
+        <span class="hint">กรอกในช่องเดียวกัน โดยเว้นวรรคระหว่างชื่อกับนามสกุล</span>
+        <input type="text" id="fullName" name="fullName" autocomplete="name" placeholder="เช่น สมชาย ใจดี" enterkeyhint="next">
+        <p class="err">กรุณากรอกทั้งชื่อและนามสกุล โดยเว้นวรรคคั่น เช่น สมชาย ใจดี</p>
       </div>
 
       <div class="field" id="f-houseNo">
@@ -544,7 +539,7 @@ input:focus,select:focus{ border-color:var(--green); }
       <button class="btn btn-wait" id="submitBtn" type="submit">
         <span id="submitText">บันทึกข้อมูล</span>
       </button>
-      <p class="locked-note" id="readyNote" aria-live="polite">ยังกรอกไม่ครบ · เหลืออีก 6 ช่อง</p>
+      <p class="locked-note" id="readyNote" aria-live="polite">ยังกรอกไม่ครบ · เหลืออีก 5 ช่อง</p>
       <button class="btn btn-ghost" id="backBtn" type="button" style="margin-top:.7rem">ย้อนกลับ</button>
     </form>
   </section>
@@ -704,7 +699,7 @@ input:focus,select:focus{ border-color:var(--green); }
     toStep2.disabled = !consent.checked;
     $("lockedNote").style.visibility = consent.checked ? "hidden" : "visible";
   });
-  toStep2.addEventListener("click", () => { if (consent.checked) { show(2); $("firstName").focus({preventScroll:true}); } });
+  toStep2.addEventListener("click", () => { if (consent.checked) { show(2); $("fullName").focus({preventScroll:true}); } });
   $("backBtn").addEventListener("click", () => show(1));
 
   /* ── ไฮไลต์ตัวเลือกที่เลือก ───────────── */
@@ -727,6 +722,14 @@ input:focus,select:focus{ border-color:var(--green); }
 
   /* ── ตรวจสอบข้อมูล ────────────────────── */
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  // แยก "สมชาย ใจดี" เป็นชื่อและนามสกุล เพื่อเก็บลง Google Sheets คนละคอลัมน์
+  function splitName(v){
+    const parts = String(v || "").trim().replace(/\s+/g, " ").split(" ");
+    const first = parts.shift() || "";
+    const last = parts.join(" ");
+    return { first, last, full: (first + " " + last).trim(), ok: first.length > 0 && last.length > 0 };
+  }
 
   /* ── ตรวจการลงทะเบียนซ้ำ (เลขที่บ้าน + สถานะ) ── */
   const dupNotice = $("dupNotice");
@@ -776,8 +779,7 @@ input:focus,select:focus{ border-color:var(--green); }
   function checks(){
     const em = $("email").value.trim();
     return [
-      ["f-firstName", $("firstName").value.trim().length > 0],
-      ["f-lastName",  $("lastName").value.trim().length > 0],
+      ["f-fullName",  splitName($("fullName").value).ok],
       ["f-houseNo",   $("houseNo").value.trim().length > 0],
       ["f-phone",     /^\d{9,10}$/.test($("phone").value.trim())],
       ["f-email",     CONFIG.requireEmail ? EMAIL_RE.test(em) : (em === "" || EMAIL_RE.test(em))],
@@ -828,7 +830,7 @@ input:focus,select:focus{ border-color:var(--green); }
     return true;
   }
 
-  ["firstName","lastName","phone","email"].forEach((id) => {
+  ["fullName","phone","email"].forEach((id) => {
     $(id).addEventListener("input", () => { $("f-" + id).classList.remove("bad"); updateReady(); });
     $(id).addEventListener("blur",  () => {
       const found = checks().find(([fid]) => fid === "f-" + id);
@@ -865,9 +867,10 @@ input:focus,select:focus{ border-color:var(--green); }
     if ($("website").value) return;          // บอทกรอก honeypot
     if (!validate()) return;
 
+    const who = splitName($("fullName").value);
     const data = {
-      firstName: $("firstName").value.trim(),
-      lastName:  $("lastName").value.trim(),
+      firstName: who.first,
+      lastName:  who.last,
       houseNo:   $("houseNo").value.trim(),
       phone:     $("phone").value.trim(),
       email:     $("email").value.trim(),
@@ -916,7 +919,7 @@ input:focus,select:focus{ border-color:var(--green); }
 
   function finish(d){
     const rows = [
-      ["ชื่อ–นามสกุล", d.firstName + " " + d.lastName],
+      ["ชื่อ และนามสกุล", (d.firstName + " " + d.lastName).trim()],
       ["เลขที่บ้าน", d.houseNo],
       ["เบอร์โทรศัพท์", d.phone],
       ["อีเมล", d.email || "–"],
@@ -939,7 +942,7 @@ input:focus,select:focus{ border-color:var(--green); }
     $("houseNo").classList.add("empty");
     updateReady();
     show(2);
-    $("firstName").focus({preventScroll:true});
+    $("fullName").focus({preventScroll:true});
   });
 })();
 </script>
