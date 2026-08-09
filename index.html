@@ -890,8 +890,7 @@ input:focus,select:focus{ border-color:var(--green); }
 
     const who = splitName($("fullName").value);
     const data = {
-      firstName: who.first,
-      lastName:  who.last,
+      fullName:  who.full,
       houseNo:   $("houseNo").value.trim(),
       phone:     $("phone").value.trim(),
       email:     $("email").value.trim(),
@@ -953,7 +952,7 @@ input:focus,select:focus{ border-color:var(--green); }
 
   function finish(d){
     const rows = [
-      ["ชื่อ และนามสกุล", (d.firstName + " " + d.lastName).trim()],
+      ["ชื่อ และนามสกุล", d.fullName],
       ["เลขที่บ้าน", d.houseNo],
       ["เบอร์โทรศัพท์", d.phone],
       ["อีเมล", d.email || "–"],
