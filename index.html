@@ -745,10 +745,11 @@ input:focus,select:focus{ border-color:var(--green); }
 
   function showDup(info){
     if (info && info.taken) {
+      const who = info.name ? "คุณ" + esc(info.name) : "ลูกบ้านท่านหนึ่ง";
+      const when = info.date ? " เมื่อวันที่ " + esc(info.date) : "";
       dupNotice.innerHTML =
-        "⚠️ <b>บ้านเลขที่ " + esc(info.houseNo) + " สถานะ " + esc(info.status) + " ลงทะเบียนไว้แล้ว</b>" +
-        (info.name ? " โดยคุณ " + esc(info.name) : "") +
-        (info.date ? " เมื่อ " + esc(info.date) : "") +
+        "⚠️ <b>บ้านเลขที่ " + esc(info.houseNo) + " สถานะ" + esc(info.status) + " ลงทะเบียนไว้แล้ว</b>" +
+        "<span class=\"tip\">ลงทะเบียนโดย " + who + when + "</span>" +
         "<span class=\"tip\">หนึ่งบ้านลงทะเบียนได้สถานะละ 1 ท่าน หากท่านเป็นอีกสถานะหนึ่ง กรุณาเลือกสถานะให้ตรง " +
         "หรือติดต่อตัวแทนลูกบ้านเพื่อขอแก้ไขข้อมูลค่ะ</span>";
       dupNotice.classList.add("show");
