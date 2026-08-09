@@ -420,19 +420,45 @@ input:focus,select:focus{ border-color:var(--green); }
 /* ── พื้นที่สำหรับสั่งพิมพ์ ─────────────── */
 #printArea{ display:none; }
 @media print{
-  @page{ size:A4; margin:18mm 16mm; }
-  html,body{ background:#fff !important; font-size:15px; }
+  @page{ size:A4; margin:16mm; }
+  html,body{ background:#fff !important; font-size:14px; }
   #app{ display:none !important; }
-  #printArea{ display:block !important; color:#000; }
-  #printArea h1{ font-size:1.35rem; margin:0 0 .2rem; text-align:center; }
-  #printArea .pr-sub{ text-align:center; margin:0 0 1.4rem; font-size:.95rem; color:#333; }
-  #printArea .pr-body p{ margin:0 0 .8rem; text-indent:1.5rem; line-height:1.9; }
-  #printArea .pr-info{
-    margin:1.2rem 0; border:1px solid #999; border-radius:6px; padding:.7rem .9rem;
+  #printArea{ display:block !important; color:#111; }
+
+  .pr-sheet{
+    border:1px solid #BBB; border-radius:10px;
+    padding:14mm 13mm 12mm; overflow:hidden;
   }
-  #printArea .pr-info div{ display:flex; justify-content:space-between; padding:.15rem 0; }
-  #printArea .pr-foot{ margin-top:1.6rem; font-size:.9rem; text-align:center; color:#333; }
-  #printArea .pr-sign{ margin-top:2.4rem; text-align:right; line-height:2.4; }
+  .pr-bar{ height:5mm; background:#12833C; margin:-14mm -13mm 9mm; }
+
+  #printArea h1{
+    font-family:"Noto Serif Thai",serif; font-size:20pt; font-weight:700;
+    text-align:center; margin:0 0 1mm; letter-spacing:.2px;
+  }
+  .pr-sub{ text-align:center; margin:0 0 6mm; font-size:11pt; color:#444; }
+  .pr-rule{ border:0; border-top:1px solid #CCC; margin:0 0 7mm; }
+
+  .pr-body p{
+    margin:0 0 4.5mm; text-indent:12mm;
+    line-height:1.95; font-size:12pt; text-align:left;
+  }
+  .pr-body p:last-child{ margin-bottom:0; }
+
+  .pr-info{
+    margin:8mm 0 0; border:1px solid #BBB; border-radius:6px;
+    padding:4mm 5mm; background:#FAFCFE;
+  }
+  .pr-info div{
+    display:flex; justify-content:space-between; gap:8mm;
+    padding:1.4mm 0; font-size:11.5pt;
+  }
+  .pr-info div + div{ border-top:1px dotted #DDD; }
+  .pr-info span:first-child{ color:#555; }
+  .pr-info span:last-child{ font-weight:700; text-align:right; }
+
+  .pr-sign{ margin-top:8mm; text-align:right; font-size:11.5pt; line-height:1.9; }
+  .pr-sign b{ display:block; color:#12833C; font-size:12pt; }
+  .pr-foot{ margin-top:10mm; font-size:9.5pt; text-align:center; color:#777; }
 }
 </style>
 </head>
@@ -642,12 +668,16 @@ input:focus,select:focus{ border-color:var(--green); }
 
 <!-- ═══ เนื้อหาสำหรับสั่งพิมพ์เท่านั้น ═══ -->
 <div id="printArea">
-  <h1>หนังสือยืนยันตัวตนลูกบ้าน</h1>
-  <p class="pr-sub">หมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่</p>
-  <div class="pr-body" id="prBody"></div>
-  <div class="pr-info" id="prInfo"></div>
-  <div class="pr-sign" id="prSign"></div>
-  <p class="pr-foot">เอกสารนี้จัดทำโดยระบบยืนยันข้อมูลลูกบ้านโดยอัตโนมัติ</p>
+  <div class="pr-sheet">
+    <div class="pr-bar"></div>
+    <h1>หนังสือยืนยันตัวตนลูกบ้าน</h1>
+    <p class="pr-sub">หมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซ็นจูรี่ โครงการ 74 ไร่</p>
+    <hr class="pr-rule">
+    <div class="pr-body" id="prBody"></div>
+    <div class="pr-info" id="prInfo"></div>
+    <div class="pr-sign" id="prSign"></div>
+    <p class="pr-foot">เอกสารนี้จัดทำโดยระบบยืนยันข้อมูลลูกบ้านโดยอัตโนมัติ</p>
+  </div>
 </div>
 
 <script>
@@ -914,7 +944,7 @@ input:focus,select:focus{ border-color:var(--green); }
   function statementHTML(d){
     const f = (v) => '<span class="fill">' + esc(v) + '</span>';
     return [
-      "ข้าพเจ้า (นาย/นาง/นางสาว) " + f(d.firstName) + " นามสกุล " + f(d.lastName) +
+      "ข้าพเจ้า " + f(d.firstName) + " นามสกุล " + f(d.lastName) +
       " ขอยืนยันกับตัวแทนลูกบ้านว่า LINE ID ที่ใช้เข้าร่วมในกลุ่มนี้ เป็น LINE ID ของข้าพเจ้าอย่างแท้จริง " +
       "โดยข้าพเจ้าเป็น" + f(d.status) + "ของบ้านเลขที่ " + f(d.houseNo),
 
@@ -1096,8 +1126,8 @@ input:focus,select:focus{ border-color:var(--green); }
     setSending(true, "กำลังจัดทำหลักฐาน…");
     try {
       evidenceData = await makeEvidenceImage(record, when);
-      evidenceName = "ยืนยันตัวตน_" + record.houseNo.replace(/\//g, "-") + "_" +
-                     record.status + "_" + record.fullName.replace(/\s+/g, "-");
+      evidenceName = record.houseNo.replace(/\//g, "-") + "_" +
+                     record.fullName.replace(/\s+/g, " ") + "_" + record.phone;
 
       setSending(true, "กำลังบันทึกข้อมูล…");
 
@@ -1161,7 +1191,7 @@ input:focus,select:focus{ border-color:var(--green); }
     $("prBody").innerHTML = statementPlain(d).map((p) => "<p>" + esc(p) + "</p>").join("");
     $("prInfo").innerHTML = infoRows(d).map(([k, v]) =>
       "<div><span>" + k + "</span><span><b>" + esc(v) + "</b></span></div>").join("");
-    $("prSign").innerHTML = "ให้ความยินยอมเมื่อวันที่ " + esc(วันที่ไทย(when)) +
+    $("prSign").innerHTML = "<b>✓ ให้ความยินยอมแล้ว</b>เมื่อวันที่ " + esc(วันที่ไทย(when)) +
                             " เวลา " + esc(เวลาไทย(when));
 
     $("evLink").innerHTML = out && out.evidenceUrl
