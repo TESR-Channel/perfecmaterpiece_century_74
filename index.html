@@ -76,6 +76,7 @@ body{
 h1,h2,h3,.serif{ font-family:"Noto Serif Thai","Sarabun",serif; font-weight:600; line-height:1.45; }
 
 .wrap{ width:100%; max-width:41rem; margin:0 auto; padding:1rem 1rem 2.5rem; }
+.card,.decl,.decl-info,.summary{ overflow-wrap:anywhere; }
 
 /* ── หัวเว็บ ─────────────────────────────── */
 .top{
@@ -313,7 +314,7 @@ input:focus,select:focus{ border-color:var(--green); }
   text-align:left; margin:1.4rem 0 0; border-top:1px solid var(--line);
 }
 .summary div{
-  display:flex; justify-content:space-between; gap:1rem;
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
   padding:.7rem .25rem; border-bottom:1px solid var(--line); font-size:.95rem;
 }
 .summary dt{ color:var(--ink-soft); margin:0; }
@@ -381,7 +382,7 @@ input:focus,select:focus{ border-color:var(--green); }
 .decl p{ margin:0 0 .9rem; text-indent:1.5rem; }
 .decl p:last-child{ margin-bottom:0; }
 .fill{
-  display:inline-block; padding:0 .3rem;
+  display:inline; padding:0 .3rem; word-break:break-word;
   background:var(--green-soft); border-bottom:2px solid var(--green);
   font-weight:700; color:var(--green-dark);
 }
@@ -390,7 +391,8 @@ input:focus,select:focus{ border-color:var(--green); }
   background:#F4F9FD; border:1px solid var(--line); border-radius:10px;
   font-size:.92rem; line-height:1.8;
 }
-.decl-info div{ display:flex; justify-content:space-between; gap:1rem; }
+.decl-info div{ display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.decl-info span{ min-width:0; }
 .decl-info span:first-child{ color:var(--ink-soft); }
 .decl-info span:last-child{ font-weight:600; text-align:right; word-break:break-word; }
 
@@ -1008,21 +1010,78 @@ input:focus,select:focus{ border-color:var(--green); }
   });
 
   /* ── วาดหลักฐานเป็นรูปภาพด้วย Canvas ──── */
+  // ตัดคำภาษาไทยด้วยตัวแบ่งคำของระบบ (รองรับ iOS 14.1+, Android, Windows, macOS)
+  let ตัวแบ่งคำ = null;
+  try {
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      ตัวแบ่งคำ = new Intl.Segmenter("th", { granularity: "word" });
+    }
+  } catch (e) { ตัวแบ่งคำ = null; }
+
   function wrapThai(ctx, text, maxWidth){
     const lines = [];
-    let line = "";
     const combining = /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/;
+
+    // แบ่งตัวอักษรทีละตัว เผื่อกรณีคำเดียวยาวเกินบรรทัด
+    const ซอยตัวอักษร = (คำ) => {
+      const out = [];
+      let ท่อน = "";
+      for (let i = 0; i < คำ.length; i++) {
+        if (ctx.measureText(ท่อน + คำ[i]).width > maxWidth && ท่อน !== "") {
+          let head = ท่อน, tail = คำ[i];
+          while (tail && combining.test(tail[0])) { head += tail[0]; tail = tail.slice(1); }
+          out.push(head); ท่อน = tail;
+        } else {
+          ท่อน += คำ[i];
+        }
+      }
+      if (ท่อน) out.push(ท่อน);
+      return out;
+    };
+
+    if (ตัวแบ่งคำ) {
+      let line = "";
+      const ดิบ = Array.from(ตัวแบ่งคำ.segment(text), (x) => x.segment);
+
+      // รวมกลุ่มตัวเลขเข้าด้วยกัน ไม่ให้ 112/296 ถูกตัดเป็น "112/" กับ "296"
+      const คำทั้งหมด = [];
+      ดิบ.forEach((t) => {
+        const ก่อนหน้า = คำทั้งหมด[คำทั้งหมด.length - 1];
+        if (ก่อนหน้า && /[0-9]$/.test(ก่อนหน้า) && /^[\/\-.@]$/.test(t)) {
+          คำทั้งหมด[คำทั้งหมด.length - 1] = ก่อนหน้า + t; return;
+        }
+        if (ก่อนหน้า && /[0-9][\/\-.@]$/.test(ก่อนหน้า) && /^[0-9]/.test(t)) {
+          คำทั้งหมด[คำทั้งหมด.length - 1] = ก่อนหน้า + t; return;
+        }
+        คำทั้งหมด.push(t);
+      });
+
+      for (const คำ of คำทั้งหมด) {
+        if (line !== "" && ctx.measureText(line + คำ).width > maxWidth) {
+          if (คำ === " ") { lines.push(line); line = ""; continue; }
+          lines.push(line.replace(/\s+$/, ""));
+          const ท่อน = ซอยตัวอักษร(คำ);
+          while (ท่อน.length > 1) lines.push(ท่อน.shift());
+          line = ท่อน[0] || "";
+        } else {
+          line += คำ;
+        }
+      }
+      if (line.trim()) lines.push(line);
+      return lines;
+    }
+
+    // เครื่องรุ่นเก่าที่ไม่มีตัวแบ่งคำ ใช้วิธีตัดตามความกว้างแทน
+    let line = "";
     for (let i = 0; i < text.length; i++) {
       const test = line + text[i];
       if (ctx.measureText(test).width > maxWidth && line !== "") {
         let cut = line.length;
         const sp = line.lastIndexOf(" ");
-        if (sp > maxWidth / 40) cut = sp;            // ตัดที่ช่องว่างถ้ามี
+        if (sp > 0 && ctx.measureText(line.slice(0, sp)).width >= maxWidth * 0.82) cut = sp;
         let head = line.slice(0, cut);
         let tail = line.slice(cut).replace(/^ /, "");
-        while (tail && combining.test(tail[0])) {     // ไม่ให้สระ/วรรณยุกต์ขึ้นต้นบรรทัด
-          head += tail[0]; tail = tail.slice(1);
-        }
+        while (tail && combining.test(tail[0])) { head += tail[0]; tail = tail.slice(1); }
         lines.push(head);
         line = tail + text[i];
       } else {
@@ -1033,78 +1092,138 @@ input:focus,select:focus{ border-color:var(--green); }
     return lines;
   }
 
+
   async function makeEvidenceImage(d, when){
-    try { await document.fonts.load('400 26px "Sarabun"'); await document.fonts.ready; } catch(e){}
+    await ensureFonts();
 
-    const W = 1000, PAD = 60, MAXW = W - PAD * 2;
+    const W = 1000, PAD = 70, MAXW = W - PAD * 2;
     const c = document.createElement("canvas");
-    const ctx = c.getContext("2d");
-    const F = (w, s) => w + " " + s + 'px "Sarabun", sans-serif';
+    c.width = W; c.height = 300;
+    let ctx = c.getContext("2d");
 
-    // รอบแรก: คำนวณความสูงที่ต้องใช้
+    const FF = '"Sarabun","Noto Sans Thai","Helvetica Neue",sans-serif';
+    const font = (weight, size) => weight + " " + size + "px " + FF;
+
+    // ย่อขนาดตัวอักษรจนกว่าข้อความจะอยู่ในกรอบพอดี (ใช้ context เดียวกับตอนวาด)
+    function fitOneLine(text, weight, start, min, maxw){
+      let size = start;
+      while (size > min) {
+        ctx.font = font(weight, size);
+        if (ctx.measureText(text).width <= maxw) break;
+        size -= 1;
+      }
+      return size;
+    }
+
     const paras = statementPlain(d);
-    ctx.font = F(400, 26);
-    const wrapped = paras.map((p) => wrapThai(ctx, "        " + p, MAXW));
-    const rows = infoRows(d);
-    let H = 250;                                   // หัวเอกสาร
-    wrapped.forEach((ls) => { H += ls.length * 44 + 22; });
-    H += 40 + rows.length * 44 + 40;               // ตารางข้อมูล
-    H += 200;                                      // ส่วนท้าย
-    c.width = W; c.height = H;
+    const rows  = infoRows(d);
+    const หัวเรื่อง = "หนังสือยืนยันตัวตนลูกบ้าน";
+    const หัวรอง   = (CONFIG.villageName || "") + " โครงการ 74 ไร่";
+    const บรรทัดวันที่ = "เมื่อวันที่ " + วันที่ไทย(when) + " เวลา " + เวลาไทย(when);
+    const ท้ายเอกสาร = "เอกสารนี้จัดทำโดยระบบยืนยันข้อมูลลูกบ้านโดยอัตโนมัติ";
 
-    const ctx2 = c.getContext("2d");
-    ctx2.fillStyle = "#FFFFFF"; ctx2.fillRect(0, 0, W, H);
-    ctx2.fillStyle = "#12833C"; ctx2.fillRect(0, 0, W, 10);
+    // 1) เนื้อความ — ลดขนาดลงทีละขั้นจนทุกบรรทัดไม่ล้นกรอบ
+    let bodySize = 26, wrapped = [];
+    for (let i = 0; i < 8; i++) {
+      ctx.font = font(400, bodySize);
+      wrapped = paras.map((p) => wrapThai(ctx, "\u2003\u2003" + p, MAXW));
+      let widest = 0;
+      wrapped.forEach((ls) => ls.forEach((l) => {
+        widest = Math.max(widest, ctx.measureText(l).width);
+      }));
+      if (widest <= MAXW || bodySize <= 18) break;
+      bodySize -= 1;
+    }
+    const lineH = Math.round(bodySize * 1.72);
 
-    let y = 78;
-    ctx2.textBaseline = "alphabetic";
-    ctx2.fillStyle = "#12354F";
-    ctx2.textAlign = "center";
-    ctx2.font = F(700, 38);
-    ctx2.fillText("หนังสือยืนยันตัวตนลูกบ้าน", W / 2, y); y += 44;
-    ctx2.font = F(400, 24);
-    ctx2.fillStyle = "#4E7291";
-    ctx2.fillText("หมู่บ้านเพอร์เฟค มาสเตอร์พีซ เซนจูรี่ โครงการ 74 ไร่", W / 2, y); y += 46;
+    // 2) หัวเรื่องและข้อความบรรทัดเดียวอื่น ๆ
+    const titleSize = fitOneLine(หัวเรื่อง, 700, 38, 22, MAXW);
+    const subSize   = fitOneLine(หัวรอง,   400, 24, 15, MAXW);
+    const dateSize  = fitOneLine(บรรทัดวันที่, 400, 24, 15, MAXW);
+    const footSize  = fitOneLine(ท้ายเอกสาร, 400, 20, 13, MAXW);
 
-    ctx2.strokeStyle = "#C6DDEF"; ctx2.lineWidth = 2;
-    ctx2.beginPath(); ctx2.moveTo(PAD, y); ctx2.lineTo(W - PAD, y); ctx2.stroke();
-    y += 48;
+    // 3) ตารางข้อมูล — ย่อเฉพาะค่าที่ยาว เช่น อีเมล ไม่ให้ชนกับหัวข้อ
+    const INPAD = 26, GAP = 40;
+    const rowSizes = rows.map(([k, v]) => {
+      ctx.font = font(400, 24);
+      const kw = ctx.measureText(k).width;
+      const room = MAXW - INPAD * 2 - kw - GAP;
+      return { kw, vSize: fitOneLine(String(v), 600, 24, 14, room) };
+    });
+    const rowH = 46;
 
-    ctx2.textAlign = "left";
-    ctx2.fillStyle = "#12354F";
-    ctx2.font = F(400, 26);
+    // 4) คำนวณความสูงจริงของเอกสาร
+    let H = 26 + 54 + titleSize + 14 + subSize + 40;      // แถบเขียว + หัวเรื่อง
+    H += 34;                                              // เส้นคั่น
+    wrapped.forEach((ls) => { H += ls.length * lineH + Math.round(lineH * 0.55); });
+    const boxH = rows.length * rowH + 30;
+    H += 34 + boxH;                                       // กล่องข้อมูล
+    H += 56 + 34 + dateSize + 14;                         // บรรทัดยินยอม
+    H += 54 + footSize + 54;                              // ท้ายเอกสาร
+    H = Math.round(H);
+
+    c.height = H;
+    ctx = c.getContext("2d");                             // ตั้งขนาดใหม่แล้ว context จะถูกรีเซ็ต
+
+    // ── เริ่มวาด ──
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#12833C"; ctx.fillRect(0, 0, W, 14);
+
+    let y = 14 + 54 + titleSize;
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#12354F"; ctx.font = font(700, titleSize);
+    ctx.fillText(หัวเรื่อง, W / 2, y);
+
+    y += 14 + subSize;
+    ctx.fillStyle = "#4E7291"; ctx.font = font(400, subSize);
+    ctx.fillText(หัวรอง, W / 2, y);
+
+    y += 40;
+    ctx.strokeStyle = "#C6DDEF"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(PAD, y); ctx.lineTo(W - PAD, y); ctx.stroke();
+
+    y += 34 + bodySize;
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#12354F"; ctx.font = font(400, bodySize);
     wrapped.forEach((ls) => {
-      ls.forEach((ln) => { ctx2.fillText(ln, PAD, y); y += 44; });
-      y += 22;
+      ls.forEach((ln) => { ctx.fillText(ln, PAD, y); y += lineH; });
+      y += Math.round(lineH * 0.55);
     });
 
-    y += 12;
-    const boxTop = y - 28;
-    const boxH = rows.length * 44 + 34;
-    ctx2.fillStyle = "#F4F9FD";
-    ctx2.strokeStyle = "#C6DDEF";
-    ctx2.beginPath();
-    ctx2.roundRect ? ctx2.roundRect(PAD, boxTop, MAXW, boxH, 12) : ctx2.rect(PAD, boxTop, MAXW, boxH);
-    ctx2.fill(); ctx2.stroke();
-    y = boxTop + 44;
-    rows.forEach(([k, v]) => {
-      ctx2.font = F(400, 24); ctx2.fillStyle = "#4E7291";
-      ctx2.textAlign = "left"; ctx2.fillText(k, PAD + 22, y);
-      ctx2.font = F(600, 24); ctx2.fillStyle = "#12354F";
-      ctx2.textAlign = "right"; ctx2.fillText(String(v), W - PAD - 22, y);
-      y += 44;
+    // กล่องข้อมูล
+    y += 10;
+    const boxTop = y;
+    ctx.fillStyle = "#F4F9FD"; ctx.strokeStyle = "#C6DDEF"; ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(PAD, boxTop, MAXW, boxH, 14);
+    else ctx.rect(PAD, boxTop, MAXW, boxH);
+    ctx.fill(); ctx.stroke();
+
+    let ry = boxTop + 15 + Math.round(rowH * 0.68);
+    rows.forEach(([k, v], i) => {
+      ctx.textAlign = "left";  ctx.fillStyle = "#4E7291";
+      ctx.font = font(400, 24); ctx.fillText(k, PAD + INPAD, ry);
+      ctx.textAlign = "right"; ctx.fillStyle = "#12354F";
+      ctx.font = font(600, rowSizes[i].vSize);
+      ctx.fillText(String(v), W - PAD - INPAD, ry);
+      ry += rowH;
     });
 
-    y = boxTop + boxH + 60;
-    ctx2.textAlign = "right";
-    ctx2.font = F(600, 26); ctx2.fillStyle = "#12833C";
-    ctx2.fillText("✓ ให้ความยินยอมแล้ว", W - PAD, y); y += 40;
-    ctx2.font = F(400, 24); ctx2.fillStyle = "#12354F";
-    ctx2.fillText("เมื่อวันที่ " + วันที่ไทย(when) + " เวลา " + เวลาไทย(when), W - PAD, y); y += 52;
+    // บรรทัดยินยอม
+    y = boxTop + boxH + 56;
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#12833C"; ctx.font = font(600, 26);
+    ctx.fillText("\u2713 ให้ความยินยอมแล้ว", W - PAD, y);
+    y += 34 + dateSize - 10;
+    ctx.fillStyle = "#12354F"; ctx.font = font(400, dateSize);
+    ctx.fillText(บรรทัดวันที่, W - PAD, y);
 
-    ctx2.textAlign = "center";
-    ctx2.font = F(400, 20); ctx2.fillStyle = "#7C93A6";
-    ctx2.fillText("เอกสารนี้จัดทำโดยระบบยืนยันข้อมูลลูกบ้านโดยอัตโนมัติ", W / 2, y);
+    // ท้ายเอกสาร
+    y += 54 + footSize - 10;
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#7C93A6"; ctx.font = font(400, footSize);
+    ctx.fillText(ท้ายเอกสาร, W / 2, y);
 
     return c.toDataURL("image/png");
   }
