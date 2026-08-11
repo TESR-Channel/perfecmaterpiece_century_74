@@ -1093,6 +1093,17 @@ input:focus,select:focus{ border-color:var(--green); }
   }
 
 
+  // โหลดฟอนต์ให้พร้อมก่อนวาด เพื่อให้การวัดความกว้างตรงกับตอนวาดจริง
+  async function ensureFonts(){
+    const specs = ['400 26px "Sarabun"', '600 24px "Sarabun"', '700 38px "Sarabun"'];
+    try {
+      await Promise.race([
+        Promise.all(specs.map((s) => document.fonts.load(s))).then(() => document.fonts.ready),
+        new Promise((r) => setTimeout(r, 3000))     // กันเครื่องที่โหลดฟอนต์ช้า
+      ]);
+    } catch (e) { /* ใช้ฟอนต์ระบบแทนได้ */ }
+  }
+
   async function makeEvidenceImage(d, when){
     await ensureFonts();
 
