@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2F6B4F">
+<meta name="theme-color" content="#12833C">
 <title>ยืนยันข้อมูลลูกบ้าน | หมู่บ้านเพอร์เฟค มาสเตอร์พีซ รัตนาธิเบศร์</title>
 <meta name="description" content="แบบฟอร์มยืนยันข้อมูลพื้นฐานของลูกบ้าน หมู่บ้านเพอร์เฟค มาสเตอร์พีซ รัตนาธิเบศร์">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,10 @@ const CONFIG = {
   //    เช่น "pdpa.pdf" ถ้าอัปโหลดไฟล์ไว้ในโฟลเดอร์เดียวกัน
   pdpaPdfUrl: "",
 
-  // 3) ลิงก์ LINE Official Account ของหมู่บ้าน (กด QR แล้วเด้งเข้าลิงก์นี้)
-  lineUrl: "https://lin.ee/TN8LooM",
+  // 3) ลิงก์กลุ่ม LINE OpenChat ของหมู่บ้าน (ปุ่ม "เข้ากลุ่ม OpenChat" จะพาไปที่ลิงก์นี้)
+  //    เปิดกลุ่มใน LINE → เมนู → เชิญ → คัดลอกลิงก์ แล้วนำมาวางตรงนี้
+  //    ถ้าเว้นว่างไว้ ปุ่มจะถูกซ่อนอัตโนมัติ
+  openChatUrl: "https://line.me/ti/g2/n-7uAakmyQfNg6RAyempgUmXn1P6iAm2MvryRA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default",
 
   // 4) เบอร์ติดต่อตัวแทนลูกบ้าน (แสดงท้ายเว็บ) — เว้นว่างได้
   contactPhone: "",
@@ -327,23 +329,16 @@ input:focus,select:focus{ border-color:var(--green); }
   padding:1.6rem 1.25rem;
 }
 .line-box h3{ font-size:1.25rem; margin:0 0 .3rem; }
-.line-box p{ margin:0 auto 1.1rem; color:var(--ink-soft); max-width:26rem; font-size:.95rem; }
+.line-box p{ margin:0 auto 1.4rem; color:var(--ink-soft); max-width:26rem; font-size:.95rem; }
 .line-step{
   font-size:.72rem !important; letter-spacing:.18em; font-weight:600;
   color:var(--gold) !important; text-transform:uppercase; margin:0 0 .35rem !important;
 }
-.qr-link{ display:block; width:fit-content; margin:0 auto; border-radius:16px; }
-.qr{
-  width:min(15rem,72vw); height:auto; display:block;
-  padding:.85rem; background:#fff; border:2px solid var(--line); border-radius:14px;
-}
-.qr-link:hover .qr{ border-color:#06C755; }
-.qr-cap{ margin:.9rem auto 0 !important; font-size:.88rem; max-width:22rem; line-height:1.6; }
 .line-btn{
   /* ใช้ flex ระดับบล็อก เพื่อไม่ให้เกิดช่องว่างส่วนเกินใต้ปุ่มจากระยะบรรทัด */
   display:flex; align-items:center; justify-content:center;
-  width:fit-content; margin:1.25rem auto 0;
-  min-height:56px; padding:.8rem 1.6rem;
+  width:fit-content; max-width:100%; margin:0 auto;
+  min-height:60px; padding:.85rem 2rem; font-size:1.05rem;
   background:#06C755; color:#fff; font-weight:700; text-decoration:none;
   border-radius:12px; box-shadow:0 3px 0 #049A43;
 }
@@ -645,19 +640,14 @@ input:focus,select:focus{ border-color:var(--green); }
     <p class="lb-hint">ใช้สองนิ้วถ่างเพื่อขยาย หรือกดปุ่ม “ขยายภาพ +” แล้วเลื่อนดูได้ค่ะ</p>
   </div>
 
-  <!-- ═══ LINE OFFICIAL (แสดงเมื่อกรอกเสร็จแล้วเท่านั้น) ═══ -->
+  <!-- ═══ กลุ่ม LINE OpenChat (แสดงเมื่อบันทึกเสร็จแล้วเท่านั้น) ═══ -->
   <section class="line-box hidden" id="lineSection">
     <p class="line-step">ขั้นตอนสุดท้าย</p>
     <h3>เข้ากลุ่ม LINE OpenChat ของหมู่บ้าน</h3>
-    <p>สแกน QR Code นี้ด้วยกล้องมือถือ หรือ<b>กดที่รูป</b>เพื่อเข้า LINE ได้ทันทีค่ะ</p>
-    <a class="qr-link" id="qrLink" target="_blank" rel="noopener"
-       aria-label="เพิ่มเพื่อน LINE OpenChat ของตัวแทนลูกบ้าน">
-      <img class="qr" src="Line-openchat.jpg" alt="QR Code สำหรับเพิ่มเพื่อน LINE OpenChat ของตัวแทนลูกบ้าน 74 ไร่" width="540" height="540">
-    </a>
-    <p class="qr-cap">LINE OpenChat · ตัวแทนลูกบ้าน 74 ไร่</p>
-    <a class="line-btn" id="lineBtn" href="https://line.me/ti/g2/CSeofs0qzfc9j1OUWQw-bCNw_V_8hUkrrqBT3Q?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">
+    <p>กดปุ่มด้านล่างเพื่อเข้ากลุ่ม LINE OpenChat ของตัวแทนลูกบ้าน 74 ไร่ ได้ทันทีค่ะ</p>
+    <a class="line-btn hidden" id="lineBtn" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true" style="margin-right:.5rem"><path d="M12 2C6.5 2 2 5.7 2 10.2c0 4 3.6 7.4 8.4 8 .3.07.8.23.9.53.08.27.05.7.03.97l-.15.9c-.04.27-.2 1.05.93.57s6.1-3.6 8.32-6.16C21.9 13.3 22 11.8 22 10.2 22 5.7 17.5 2 12 2z"/></svg>
-      เพิ่มเพื่อนใน LINE
+      เข้ากลุ่ม OpenChat
     </a>
   </section>
 
@@ -706,14 +696,20 @@ input:focus,select:focus{ border-color:var(--green); }
   if (CONFIG.pdpaPdfUrl) {
     const l = $("pdfLink"); l.href = CONFIG.pdpaPdfUrl; l.classList.remove("hidden");
   }
-  if (CONFIG.lineUrl) {
-    $("lineBtn").href = CONFIG.lineUrl;
-    $("qrLink").href  = CONFIG.lineUrl;
+  // ลิงก์ที่กดต้องเป็นปลายทางเดียวกับ QR Code ที่แสดงอยู่ มิฉะนั้นผู้ใช้จะไปคนละที่
+  if (CONFIG.openChatUrl) {
+    $("lineBtn").href = CONFIG.openChatUrl;
+    $("lineBtn").classList.remove("hidden");
   } else {
-    $("lineBtn").classList.add("hidden");
+    $("lineBtn").classList.add("hidden");    // ซ่อนปุ่มไว้จนกว่าจะใส่ลิงก์
   }
   if (CONFIG.contactPhone) {
     $("footPhone").innerHTML = "โทร. " + CONFIG.contactPhone + "<br>";
+  }
+
+  // เตือนผู้ดูแลระบบผ่าน Console ถ้าตั้งค่ายังไม่ครบ
+  if (!CONFIG.openChatUrl) {
+    console.warn("[ตั้งค่า] ยังไม่ได้ใส่ openChatUrl — ปุ่มเข้ากลุ่มจะถูกซ่อนไว้");
   }
 
   /* ── ป๊อปอัปแผนผังโครงการ ─────────────── */
