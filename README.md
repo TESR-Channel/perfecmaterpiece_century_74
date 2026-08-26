@@ -52,7 +52,7 @@ requireEmail: false                    // เปลี่ยนเป็น true
 1. สร้าง Repository ใหม่ (ตั้งเป็น Public)
 2. อัปโหลด `index.html`, `line-qr.png`, `map-thumb.jpg` และ `map-full.jpg` ไว้ที่ชั้นนอกสุด (ต้องอยู่โฟลเดอร์เดียวกันทั้งหมด)
 3. ไปที่ **Settings → Pages** → Source เลือก **Deploy from a branch** → branch `main` โฟลเดอร์ `/ (root)` → Save
-4. รอประมาณ 1–2 นาที จะได้ลิงก์หน้าตาแบบ `https://ชื่อผู้ใช้.github.io/ชื่อ-repo/`
+4. รอประมาณ 1–2 นาที จะได้ลิงก์หน้าตาแบบ `https://tesr-channel.github.io/perfecmaterpiece_century_74/`
 5. นำลิงก์นั้นไปทำเป็น QR Code หรือส่งในกลุ่มลูกบ้านได้เลย
 
 ## ขั้นตอนที่ 5 — ทดสอบ
